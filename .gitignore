@@ -1,3 +1,5 @@
 .idea
 *.py[cod]
-logs/log*s
+logs/log*
+migrations
+.DS_STore
