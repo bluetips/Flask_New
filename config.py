@@ -1,4 +1,5 @@
 from redis import StrictRedis
+import logging
 
 
 class Config(object):
@@ -14,6 +15,8 @@ class Config(object):
     SESSION_USE_SIGNER = True
     SESSION_REDIS = StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
     SESSION_PERMANENT = False
+
+
 
 
 class Development(Config):
