@@ -4,11 +4,9 @@ from flask import Flask
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from redis import StrictRedis
-
 from config import envir
-from info.modules.index import index_blu
 
-
+redis_store = None  # type:StrictRedis
 db = SQLAlchemy()
 
 
@@ -30,9 +28,14 @@ def create_app(en):
     app.config.from_object(envir[en])
     db.init_app(app)
     Session(app)
+    global redis_store
     redis_store = StrictRedis(host=envir[en].REDIS_HOST, port=envir['development'].REDIS_PORT)
 
+    from info.modules.index import index_blu
     app.register_blueprint(index_blu)
+
+    from info.modules.passport import passport_blu
+    app.register_blueprint(passport_blu)
 
     setup_log(en)
 

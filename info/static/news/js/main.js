@@ -1,5 +1,4 @@
 $(function(){
-
 	// 打开登录框
 	$('.login_btn').click(function(){
         $('.login_form_con').show();
@@ -150,10 +149,14 @@ $(function(){
 
 var imageCodeId = ""
 
-// TODO 生成一个图片验证码的编号，并设置页面中图片验证码img标签的src属性
+//生成一个图片验证码的编号，并设置页面中图片验证码img标签的src属性
 function generateImageCode() {
+    code_uuid = generateUUID();
+    var code_src_url = '/passport/image_code?code_id='+code_uuid;
+    $('.get_pic_code').attr('src',code_src_url);
 
 }
+
 
 // 发送短信验证码
 function sendSMSCode() {
