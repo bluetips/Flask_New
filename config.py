@@ -5,7 +5,7 @@ import logging
 class Config(object):
     SECRET_KEY = 'zhengzhi'
     PERMANENT_SESSION_LIFETIME = 86400 * 2
-    SQLALCHEMY_DATABASE_URI = 'mysql://root:12345678@localhost:3306/test'
+    SQLALCHEMY_DATABASE_URI = 'mysql://root:12345678@localhost:3306/info27'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     REDIS_HOST = '127.0.0.1'
@@ -15,8 +15,6 @@ class Config(object):
     SESSION_USE_SIGNER = True
     SESSION_REDIS = StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
     SESSION_PERMANENT = False
-
-
 
 
 class Development(Config):
