@@ -16,13 +16,17 @@ class Config(object):
     SESSION_REDIS = StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
     SESSION_PERMANENT = False
 
+    LOG_LEVEL = logging.DEBUG
+
 
 class Development(Config):
     DEBUG = True
 
+    LOG_LEVEL = logging.DEBUG
+
 
 class Product(Config):
-    pass
+    LOG_LEVEL = logging.ERROR
 
 
 envir = {
