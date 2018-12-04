@@ -1,11 +1,13 @@
+import datetime
 import random
 
 from info.constants import IMAGE_CODE_REDIS_EXPIRES
 from info.libs.yuntongxun.sms import CCP
+from info.models import User
 from info.utils.captcha.captcha import captcha
 from . import passport_blu
-from flask import request, abort, current_app, make_response, jsonify
-from info import redis_store, constants
+from flask import request, abort, current_app, make_response, jsonify, session
+from info import redis_store, constants, db
 from info.utils.response_code import RET
 
 
@@ -64,13 +66,105 @@ def sms_code():
     if real_image_code != image_code:
         return jsonify(errno=RET.DBERR, errmsg='输入验证码错误')
     sms_code = random.randint(0, 999999)
-    result = CCP().send_template_sms(mobile, [sms_code, constants.SMS_CODE_REDIS_EXPIRES / 60], '1')
-    if result != 0:
-        current_app.logger.error('短信服务商错误')
-        return jsonify(errno=RET.THIRDERR, errmsg='发送短信失败')
+    # result = CCP().send_template_sms(mobile, [sms_code, constants.SMS_CODE_REDIS_EXPIRES / 60], '1')
+
+    print(sms_code)
+    # if result != 0:
+    #     current_app.logger.error('短信服务商错误')
+    #     return jsonify(errno=RET.THIRDERR, errmsg='发送短信失败')
     try:
         redis_store.set('SMS_CODE:' + mobile, sms_code, constants.SMS_CODE_REDIS_EXPIRES)
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DATAERR, errmsg='redis数据库错误')
     return jsonify(errno=RET.OK, errmsg='发送成功')
+
+
+@passport_blu.route('/register', methods=['POST'])
+def register():
+    """取参数用户名 密码 短信验证码 校验是否齐全 校验验证码 存入用户信息数据库模型 信息保存 返回响应"""
+    dict_param = request.json
+    mobile = dict_param.get('mobile')
+    pwd = dict_param.get('pwd')
+    sms_code = dict_param.get('sms_code')
+    if not all([mobile, pwd, sms_code]):
+        current_app.logger.error('参数不齐全')
+        return jsonify(errno=RET.PARAMERR, errmsg='参数不齐全')
+    try:
+        real_sms_code = redis_store.get('SMS_CODE:' + mobile).decode()
+    except Exception as e:
+        current_app.logger.error('Redis数据库错误')
+        return jsonify(errno=RET.DBERR, errmsg='Redis数据库错误')
+    if not real_sms_code:
+        return jsonify(errno=RET.NODATA, errmsg='验证码过期')
+    if real_sms_code != sms_code:
+        return jsonify(errno=RET.DATAERR, errmsg='验证码错误')
+    try:
+        redis_store.delete("SMS_" + mobile)
+    except Exception as e:
+        current_app.logger.error(e)
+
+    user = User()
+    user.mobile = mobile
+    user.nick_name = mobile
+    user.password = pwd
+
+    try:
+        db.session.add(user)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error('mysql数据库错误')
+        return jsonify(errno=RET.DBERR, errmsg='Mysql数据库错误')
+
+    session['user_id'] = user.id
+    session['nick_name'] = user.nick_name
+    session['mobile'] = user.mobile
+
+    return jsonify(errno=RET.OK, errmasg='注册成功')
+
+
+# 登录页面实现
+@passport_blu.route('/login', methods=['POST'])
+def login():
+    """
+    获取参数：mobile pwd
+    校验参数完整，
+    是否存在mobile
+    校验密码是否正确
+    设置session，保持状态
+    返回响应
+    :return:
+    """
+    dict_param = request.json
+    mobile = dict_param.get('mobile')
+    pwd = dict_param.get('pwd')
+    if not all([mobile, pwd]):
+        return jsonify(errno=RET.PARAMERR, errmsg='参数不完整')
+
+    try:
+        user = User.query.filter_by(mobile=mobile).first()
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="查询数据错误")
+
+    if not user:
+        return jsonify(errno=RET.DATAEXIST, errmsg='用户不存在')
+
+    result = user.check_password(pwd)
+
+    if not result:
+        return jsonify(errno=RET.DBERR, errmsg='密码错误')
+
+    session['user_id'] = user.id
+    session['nick_name'] = user.nick_name
+    session['mobile'] = user.mobile
+
+    user.last_login = datetime.now()
+    try:
+        db.session.commit()
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='数据库写入错误 ')
+
+    return jsonify(errno=RET.OK,errmsg = '登录成功')

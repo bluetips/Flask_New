@@ -114,7 +114,7 @@ $(function () {
     })
 
 
-    // TODO 注册按钮点击
+    //  注册按钮点击
     $(".register_form_con").submit(function (e) {
         // 阻止默认提交操作
         e.preventDefault()
@@ -144,7 +144,29 @@ $(function () {
             return;
         }
 
+
         // 发起注册请求
+        dict_param = {
+            'mobile': mobile,
+            'pwd': password,
+            'sms_code': smscode
+        }
+
+        $.ajax({
+            url: '/passport/register',
+            type: 'post',
+            contentType: 'application/json',
+            dataType: 'json',
+            data: JSON.stringify(dict_param),
+            success: function (resp) {
+                if (resp.errno == 0) {
+                    location.reload()
+                } else {
+                    $("#register-password-err").html(resp.errmsg)
+                    $("#register-password-err").show()
+                }
+            }
+        })
 
 
     })
@@ -185,33 +207,6 @@ function sendSMSCode() {
         'image_code': imageCode,
         'image_code_id': code_uuid
     }
-
-    // 发送短信验证码
-    // $.ajax({
-    //     url: '/passport/sms_code',
-    //     method: 'POST',
-    //     data: JSON.stringify(dict_param),
-    //     contentType: "application/json",
-    //     dataType:'json',
-    //     success: function (resp) {
-    //         if (resp.errno == '0') {
-    //             var num = 60;
-    //             var t = setInterval(function () {
-    //                 if (num == '1') {
-    //                     clearInterval(t)
-    //                     $('.get_code').html('点击获取验证码');
-    //                     $('.get_code').attr('onclick', 'sendSMSCode()');
-    //                 } else {
-    //                     num -= 1;
-    //                     $('.get_code').html(num + '秒')
-    //                 }
-    //             }, 1000)
-    //         } else {
-    //             //    后端发生了错误
-    //
-    //         }
-    //     }
-    // })
     $.ajax({
         // 请求地址
         url: "/passport/sms_code",
