@@ -94,7 +94,7 @@ $(function () {
         $(this).find('a')[0].click()
     })
 
-    // TODO 登录表单提交
+    // 登录表单提交
     $(".login_form_con").submit(function (e) {
         e.preventDefault()
         var mobile = $(".login_form #mobile").val()
@@ -111,7 +111,27 @@ $(function () {
         }
 
         // 发起登录请求
+        dict_param = {
+            'mobile': mobile,
+            'pwd': password
+        }
+        $.ajax({
+            url: '/passport/login',
+            type: 'post',
+            contentType: 'application/json',
+            dataType: 'json',
+            data: JSON.stringify(dict_param),
+            success: function (resp) {
+                if (resp.errno == 0) {
+                    location.reload()
+                } else {
+                    $("#login-password-err").html(resp.errmsg)
+                    $("#login-password-err").show()
+                }
+            }
+        })
     })
+
 
 
     //  注册按钮点击
@@ -143,6 +163,9 @@ $(function () {
             $("#register-password-err").show();
             return;
         }
+
+
+
 
 
         // 发起注册请求
@@ -287,4 +310,13 @@ function generateUUID() {
         return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
     });
     return uuid;
+}
+
+function login_out() {
+    alert('ok')
+    $.get('/passport/login_out',function (resp) {
+        if (resp.errno==0){
+            location.reload()
+        }
+    })
 }

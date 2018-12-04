@@ -1,11 +1,11 @@
-import datetime
 import random
-
+from datetime import datetime
+from . import passport_blu
 from info.constants import IMAGE_CODE_REDIS_EXPIRES
 from info.libs.yuntongxun.sms import CCP
 from info.models import User
 from info.utils.captcha.captcha import captcha
-from . import passport_blu
+
 from flask import request, abort, current_app, make_response, jsonify, session
 from info import redis_store, constants, db
 from info.utils.response_code import RET
@@ -48,7 +48,6 @@ def sms_code():
     :return:
     """
     param_dict = request.json
-    print(param_dict)
     mobile = param_dict.get('mobile')
     image_code = param_dict.get('image_code')
     image_code_id = param_dict.get('image_code_id')
@@ -151,7 +150,7 @@ def login():
     if not user:
         return jsonify(errno=RET.DATAEXIST, errmsg='用户不存在')
 
-    result = user.check_password(pwd)
+    result = user.check_passowrd(pwd)
 
     if not result:
         return jsonify(errno=RET.DBERR, errmsg='密码错误')
@@ -167,4 +166,14 @@ def login():
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg='数据库写入错误 ')
 
-    return jsonify(errno=RET.OK,errmsg = '登录成功')
+    return jsonify(errno=RET.OK, errmsg='登录成功')
+
+
+@passport_blu.route('/login_out')
+def login_out():
+    """删除session,flask中以及集成好了，不用获取sessionid"""
+    session.pop('user_id', None)
+    session.pop('nick_name', None)
+    session.pop('mobile', None)
+
+    return jsonify(errno=RET.OK, errmsg='登出成功')

@@ -1,11 +1,27 @@
-from flask import render_template, current_app
+from flask import render_template, current_app, session
 
+from info.models import User
 from . import index_blu
 
 
 @index_blu.route('/')
 def index():
-    return render_template('news/index.html')
+    """
+    验证是否登录，取得session的值
+    :return:
+    """
+    try:
+        user_id = session.get('user_id')
+    except Exception as e:
+        current_app.logger.error(e)
+        return render_template('news/index.html')
+    user = None
+    if user_id:
+        user = User.query.get(user_id)
+        print(user)
+    data = {'user_info': user.to_dict() if user else None}
+    print(data)
+    return render_template('news/index.html',data=data)
 
 
 @index_blu.route('/favicon.ico')
