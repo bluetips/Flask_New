@@ -1,7 +1,7 @@
 from flask import render_template, current_app, session, request, jsonify
 
 from info import constants
-from info.models import User, News
+from info.models import User, News, Category
 from info.utils.response_code import RET
 from . import index_blu
 
@@ -28,9 +28,18 @@ def index():
     user = None
     if user_id:
         user = User.query.get(user_id)
+
+    #获取分类数据
+    category = Category.query.all()
+    category_li = []
+    for cate in category:
+        category_li.append(cate.to_dict())
+
+
     data = {
         'user_info': user.to_dict() if user else None,
-        'news_hot_list': news_hot_list
+        'news_hot_list': news_hot_list,
+        'category_li': category_li
     }
 
     return render_template('news/index.html', data=data)
