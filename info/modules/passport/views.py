@@ -136,6 +136,7 @@ def login():
     :return:
     """
     dict_param = request.json
+    print(dict_param)
     mobile = dict_param.get('mobile')
     pwd = dict_param.get('pwd')
     if not all([mobile, pwd]):

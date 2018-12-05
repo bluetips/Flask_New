@@ -120,6 +120,9 @@ $(function () {
             type: 'post',
             contentType: 'application/json',
             dataType: 'json',
+            headers: {
+                'X-CSRFToken': getCookie('csrf_token')
+            },
             data: JSON.stringify(dict_param),
             success: function (resp) {
                 if (resp.errno == 0) {
@@ -131,7 +134,6 @@ $(function () {
             }
         })
     })
-
 
 
     //  注册按钮点击
@@ -165,9 +167,6 @@ $(function () {
         }
 
 
-
-
-
         // 发起注册请求
         dict_param = {
             'mobile': mobile,
@@ -180,6 +179,9 @@ $(function () {
             type: 'post',
             contentType: 'application/json',
             dataType: 'json',
+            headers: {
+                'X-CSRFToken': getCookie('csrf-token')
+            },
             data: JSON.stringify(dict_param),
             success: function (resp) {
                 if (resp.errno == 0) {
@@ -313,9 +315,8 @@ function generateUUID() {
 }
 
 function login_out() {
-    alert('ok')
-    $.get('/passport/login_out',function (resp) {
-        if (resp.errno==0){
+    $.get('/passport/login_out', function (resp) {
+        if (resp.errno == 0) {
             location.reload()
         }
     })

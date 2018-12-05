@@ -3,8 +3,11 @@ import logging
 from flask import Flask
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
+from flask_wtf import CSRFProtect
+from flask_wtf.csrf import generate_csrf
 from redis import StrictRedis
 from config import envir
+from info.utils.comment_utils import index_loop
 
 redis_store = None  # type:StrictRedis
 db = SQLAlchemy()
@@ -36,7 +39,16 @@ def create_app(en):
 
     from info.modules.passport import passport_blu
     app.register_blueprint(passport_blu)
+    CSRFProtect(app)
 
     setup_log(en)
+
+    @app.after_request
+    def after_request(response):
+        csrf_token = generate_csrf()
+        response.set_cookie("csrf_token", csrf_token)
+        return response
+
+    app.add_template_filter(index_loop, 'index_loop')
 
     return app
