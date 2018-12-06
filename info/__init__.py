@@ -7,10 +7,12 @@ from flask_wtf import CSRFProtect
 from flask_wtf.csrf import generate_csrf
 from redis import StrictRedis
 from config import envir
-from info.utils.comment_utils import index_loop
+
 
 redis_store = None  # type:StrictRedis
 db = SQLAlchemy()
+
+from info.utils.comment_utils import index_loop
 
 
 def setup_log(en):
@@ -39,6 +41,10 @@ def create_app(en):
 
     from info.modules.passport import passport_blu
     app.register_blueprint(passport_blu)
+
+    from info.modules.news import news_blu
+    app.register_blueprint(news_blu)
+
     CSRFProtect(app)
 
     setup_log(en)

@@ -8,6 +8,7 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = 'mysql://root:12345678@localhost:3306/information'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+
     REDIS_HOST = '127.0.0.1'
     REDIS_PORT = 6379
 
