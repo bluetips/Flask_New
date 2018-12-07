@@ -12,6 +12,7 @@ from config import envir
 redis_store = None  # type:StrictRedis
 db = SQLAlchemy()
 
+
 from info.utils.comment_utils import index_loop
 
 
@@ -44,6 +45,9 @@ def create_app(en):
 
     from info.modules.news import news_blu
     app.register_blueprint(news_blu)
+
+    from info.modules.user import user_blu
+    app.register_blueprint(user_blu)
 
     CSRFProtect(app)
 
