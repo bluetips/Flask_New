@@ -242,10 +242,10 @@ def news_list():
     if not g.user:
         return redirect('/')
 
-    page = request.args.get('p')
+    page = request.args.get('p', 1)
 
     try:
-        news_paginate = News.query.filter(News.user_id == g.user.id).paginate(page, constants.USER_COLLECTION_MAX_NEWS,
+        news_paginate = News.query.filter(News.user_id == g.user.id).paginate(int(page), constants.USER_COLLECTION_MAX_NEWS,
                                                                               False)
         page = news_paginate.page
         pages = news_paginate.pages
@@ -260,8 +260,8 @@ def news_list():
 
     data = {
         'news_li': news_li,
-        'page':page,
-        'pages':pages
+        'page': page,
+        'pages': pages
     }
 
     return render_template('news/user_news_list.html', data=data)

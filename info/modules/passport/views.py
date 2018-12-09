@@ -157,8 +157,6 @@ def login():
         return jsonify(errno=RET.DBERR, errmsg='密码错误')
 
     session['user_id'] = user.id
-    session['nick_name'] = user.nick_name
-    session['mobile'] = user.mobile
 
     user.last_login = datetime.now()
     try:
@@ -174,7 +172,7 @@ def login():
 def login_out():
     """删除session,flask中以及集成好了，不用获取sessionid"""
     session.pop('user_id', None)
-    session.pop('nick_name', None)
-    session.pop('mobile', None)
+    session.pop('is_admin', None)
+
 
     return jsonify(errno=RET.OK, errmsg='登出成功')
