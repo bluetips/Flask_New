@@ -29,12 +29,11 @@ def index():
     if user_id:
         user = User.query.get(user_id)
 
-    #获取分类数据
+    # 获取分类数据
     category = Category.query.all()
     category_li = []
     for cate in category:
         category_li.append(cate.to_dict())
-
 
     data = {
         'user_info': user.to_dict() if user else None,
@@ -87,9 +86,9 @@ def new_list():
         return jsonify(errno=RET.DBERR, errmsg='数据库错误')
 
     new_list = []
-
     for new in items:
-        new_list.append(new.to_dict())
+        if new.status == 0:
+            new_list.append(new.to_dict())
     data = {
         'tottal_page': tottal_page,
         'current_page': current_page,

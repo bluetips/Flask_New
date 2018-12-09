@@ -1,6 +1,6 @@
 from logging.handlers import RotatingFileHandler
 import logging
-from flask import Flask
+from flask import Flask, render_template, g
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import CSRFProtect
@@ -8,12 +8,10 @@ from flask_wtf.csrf import generate_csrf
 from redis import StrictRedis
 from config import envir
 
-
 redis_store = None  # type:StrictRedis
-db = SQLAlchemy()
+db: SQLAlchemy = SQLAlchemy()
 
-
-from info.utils.comment_utils import index_loop
+from info.utils.comment_utils import index_loop, login_check
 
 
 def setup_log(en):
@@ -49,6 +47,9 @@ def create_app(en):
     from info.modules.user import user_blu
     app.register_blueprint(user_blu)
 
+    from info.modules.admin import admin_blu
+    app.register_blueprint(admin_blu, url_prefix='/admin')
+
     CSRFProtect(app)
 
     setup_log(en)
@@ -58,6 +59,15 @@ def create_app(en):
         csrf_token = generate_csrf()
         response.set_cookie("csrf_token", csrf_token)
         return response
+
+    @app.errorhandler(404)
+    @login_check
+    def not_found(resp):
+        user = g.user
+        data = {
+            'user_info': user.to_dict() if user else None
+        }
+        return render_template('news/404.html', data=data)
 
     app.add_template_filter(index_loop, 'index_loop')
 

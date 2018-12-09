@@ -11,6 +11,7 @@ from . import news_blu
 @login_check
 def detail(news_id):
     user = g.user
+
     news_hot = News.query.order_by(News.clicks.desc()).limit(constants.CLICK_RANK_MAX_NEWS)
     news_hot_list = []
     for ne in news_hot:
@@ -22,32 +23,48 @@ def detail(news_id):
     except Exception as e:
         current_app.logger.error(e)
 
-    if news in user.collection_news:
-        collec = True
-    else:
-        collec = False
+    if user:
 
-    try:
-        comments = Comment.query.filter(Comment.news_id == news_id).order_by(Comment.create_time.desc()).all()
-    except Exception as e:
-        current_app.logger.error(e)
-        return jsonify(errno=RET.DBERR, errmsg='数据库错误')
-
-    comment_ids = [comment.id for comment in comments]
-
-    comment_likes = CommentLike.query.filter(CommentLike.comment_id.in_(comment_ids), CommentLike.user_id == g.user.id)
-
-    comment_like_cds = [commentLike.comment_id for commentLike in comment_likes]
-
-    comment_li = []
-
-    for comm in comments:
-        comm_dict = comm.to_dict()
-        if comm.id in comment_like_cds:
-            comm_dict['is_like'] = True
+        if news in user.collection_news:
+            collec = True
         else:
+            collec =False
+
+
+        try:
+            comments = Comment.query.filter(Comment.news_id == news_id).order_by(Comment.create_time.desc()).all()
+        except Exception as e:
+            current_app.logger.error(e)
+            return jsonify(errno=RET.DBERR, errmsg='数据库错误')
+
+        comment_ids = [comment.id for comment in comments]
+
+        comment_likes = CommentLike.query.filter(CommentLike.comment_id.in_(comment_ids), CommentLike.user_id == g.user.id)
+
+        comment_like_cds = [commentLike.comment_id for commentLike in comment_likes]
+
+        comment_li = []
+
+        for comm in comments:
+            comm_dict = comm.to_dict()
+            if comm.id in comment_like_cds:
+                comm_dict['is_like'] = True
+            else:
+                comm_dict['is_like'] = False
+            comment_li.append(comm_dict)
+
+    else:
+        try:
+            comments = Comment.query.filter(Comment.news_id == news_id).order_by(Comment.create_time.desc()).all()
+        except Exception as e:
+            current_app.logger.error(e)
+            return jsonify(errno=RET.DBERR, errmsg='数据库错误')
+        comment_li = []
+        for comm in comments:
+            comm_dict = comm.to_dict()
             comm_dict['is_like'] = False
-        comment_li.append(comm_dict)
+            comment_li.append(comm_dict)
+        collec = False
 
     # 添加查询comment点赞
 
