@@ -9,7 +9,7 @@ from redis import StrictRedis
 from config import envir
 
 redis_store = None  # type:StrictRedis
-db: SQLAlchemy = SQLAlchemy()
+db= SQLAlchemy()
 
 from info.utils.comment_utils import index_loop, login_check
 

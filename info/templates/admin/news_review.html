@@ -37,7 +37,7 @@
                     <td>未通过</td>
                 {% endif %}
                 <td>
-                    <a href="news_review_detail.html" class="review">审核</a>
+                    <a href="/admin/news_review_detail?news_id={{ news.id }}" class="review">审核</a>
                 </td>
             </tr>
         {% endfor %}
@@ -55,7 +55,7 @@
             currentPage: {{ data.page }},
             totalPage: {{ data.total }},
             callback: function (current) {
-               window.location = '/admin/news_review?p=' + current
+                window.location = '/admin/news_review?p=' + current
             }
         });
     });
